@@ -1,4 +1,12 @@
-from dotenv import load_dotenv
+# 배포 시 sqlite 에러 해결
+__import__('pysqlite3')
+import sys
+sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')
+
+# 로컬로 테스트 할 땐 아래 코드 주석을 해제해야함
+# from dotenv import load_dotenv
+# load_dotenv()
+
 from langchain_community.document_loaders import PyPDFLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_openai import OpenAIEmbeddings
@@ -11,9 +19,6 @@ from langchain_core.output_parsers import StrOutputParser
 import streamlit as st
 import tempfile
 import os
-
-#Open api key load
-load_dotenv()
 
 # 제목
 st.title("ChatPDF")
