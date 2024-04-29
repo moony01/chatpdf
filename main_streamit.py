@@ -8,12 +8,40 @@ from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.runnables import RunnablePassthrough
 from langchain_core.output_parsers import StrOutputParser
 
+import streamlit as st
+import tempfile
+import os
+
+# 제목
+st.title("ChatPDF")
+st.write("---")
+
+# 파일 업로드
+uploaded_file = st.file_uploader("Choose a file")
+st.write("---")
+
+def pdf_to_document(uploaded_files):
+    temp_dir = tempfile.TemporaryDirectory()
+    temp_filepath = os.path.join(temp_dir.name, uploaded_file.name)
+    with open(temp_filepath, "wb") as f:
+        f.write(uploaded_file.getvalue())
+    loader = PyPDFLoader(temp_filepath)
+    pages = loader.load_and_split()
+    return pages
+
+# 파일 업로드 되면 동작하는 코드
+if uploaded_file is not None:
+    pages = pdf_to_document(pdf_to_document)
+    pass
+
+st.write("---")
+
 #Open api key load
 load_dotenv()
 
 #Loader
-loader = PyPDFLoader("unsu.pdf")
-pages = loader.load_and_split()
+# loader = PyPDFLoader("unsu.pdf")
+# pages = loader.load_and_split()
 
 #Split
 text_splitter = RecursiveCharacterTextSplitter(
@@ -26,22 +54,23 @@ text_splitter = RecursiveCharacterTextSplitter(
 
 texts = text_splitter.split_documents(pages)
 
-# print("texts:",texts)
-
 # load it into Chroma
 vectorstore = Chroma.from_documents(documents=texts, embedding=OpenAIEmbeddings())
 
-# print("vectorstore:",vectorstore)
-
 # Question
-question = "아내가 먹고 싶어하는 음식은 무엇이야?"
-docs = vectorstore.similarity_search(question)
+st.header("PDF에게 질문해보세요!!")
+question = st.text_input('질문을 입력하세요.')
+
+if st.button('질문하기'):
+
+# question = "아내가 먹고 싶어하는 음식은 무엇이야?"
+# docs = vectorstore.similarity_search(question)
 # print(len(docs))
 # print(docs)
 # print(docs[0].page_content)
 
 # Prompt
-template = '''다음 context를 토대로 질문에 답하고 최소 10글자 이상 30글자 이하의 문장으로 대답해줘:
+template = '''Answer the question based only on the following context:
 {context}
 
 Question: {question}
@@ -69,8 +98,6 @@ rag_chain = (
     | model
     | StrOutputParser()
 )
-
-print("rag_chain:",rag_chain)
 
 # Chain 실행
 result = rag_chain.invoke(question)
