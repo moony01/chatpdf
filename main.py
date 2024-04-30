@@ -29,10 +29,10 @@ st.title("ChatPDF")
 st.write("---")
 
 # OpenAI KEY 입력 받기
-openai_key = st.text_input('OPEN_AI_API_KEY', type="password")
+openai_key = st.text_input('Please enter your OPEN_AI_API_KEY', type="password")
 
 # 파일 업로드
-uploaded_file = st.file_uploader("PDF파일을 올려주세요", type=['pdf'])
+uploaded_file = st.file_uploader("Please upload a PDF file", type=['pdf'])
 st.write("---")
 
 def pdf_to_document(uploaded_files):
@@ -63,13 +63,13 @@ if uploaded_file is not None:
     vectorstore = Chroma.from_documents(documents=texts, embedding=OpenAIEmbeddings(openai_api_key=openai_key))
 
     # Question
-    st.header("PDF에게 질문해보세요!!")
-    question = st.text_input('질문을 입력하세요.')
+    st.header("Ask PDF a question.")
+    question = st.text_input('Please enter your question.')
 
-    if st.button('질문하기'):
-        with st.spinner('AI가 답변을 작성중입니다.'):
+    if st.button('Ask a question'):
+        with st.spinner('AI is writing an answer.'):
             # Prompt
-            template = '''다음 context를 토대로 질문에 답하고 최소 10글자 이상 30글자 이하의 문장으로 대답해줘:
+            template = '''다음 context를 토대로 질문의 언어에 맞춰 질문에 답하고 최소 10글자 이상 30글자 이하의 문장으로 대답해줘:
             {context}
 
             Question: {question}
