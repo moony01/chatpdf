@@ -13,7 +13,7 @@ from langchain_openai import OpenAIEmbeddings
 from langchain_openai import ChatOpenAI
 from langchain_chroma import Chroma
 from langchain_core.prompts import ChatPromptTemplate
-from langchain_core.runnables import RunnablePassthrough
+from langchain_core.runnables import RunnableParallel, RunnablePassthrough
 from langchain_core.output_parsers import StrOutputParser
 
 from streamlit_extras.buy_me_a_coffee import button
@@ -91,14 +91,32 @@ if uploaded_file is not None:
                 return '\n\n'.join(doc.page_content for doc in docs)
 
             # RAG Chain 연결
-            rag_chain = (
-                {'context': retriever | format_docs, 'question': RunnablePassthrough()}
+            rag_chain_from_docs = (
+                RunnablePassthrough.assign(context=(lambda x: format_docs(x["context"])))
                 | prompt
                 | model
                 | StrOutputParser()
             )
 
-            # Chain 실행
-            result = rag_chain.invoke(question)
-            print(result)
-            st.write(result)
+            rag_chain_with_source = RunnableParallel(
+                {'context': retriever, 'question': RunnablePassthrough()}
+            ).assign(answer=rag_chain_from_docs)
+
+            chat_box = st.empty()  # Streamlit의 empty 컨테이너를 생성합니다.
+
+            output = {}
+            curr_key = None
+            for chunk in rag_chain_with_source.stream(question):
+                for key in chunk:
+                    if key in 'answer':
+                        if key not in output:
+                            output[key] = chunk[key]
+                        else:
+                            output[key] += chunk[key]
+                        if key != curr_key:
+                            print(f"\n\n{key}: {chunk[key]}", end="", flush=True)
+                            chat_box.markdown(f"\n\n{key}: {output[key]}")  # Streamlit 화면에 텍스트를 실시간으로 업데이트합니다.
+                        else:
+                            print(chunk[key], end="", flush=True)
+                            chat_box.markdown(output[key])  # 현재 텍스트를 계속해서 추가합니다.
+                        curr_key = key

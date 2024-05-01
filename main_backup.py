@@ -5,7 +5,7 @@ from langchain_openai import OpenAIEmbeddings
 from langchain_chroma import Chroma
 from langchain_openai import ChatOpenAI
 from langchain_core.prompts import ChatPromptTemplate
-from langchain_core.runnables import RunnablePassthrough
+from langchain_core.runnables import RunnableParallel, RunnablePassthrough
 from langchain_core.output_parsers import StrOutputParser
 
 #Open api key load
@@ -63,15 +63,33 @@ def format_docs(docs):
     return '\n\n'.join(doc.page_content for doc in docs)
 
 # RAG Chain 연결
-rag_chain = (
-    {'context': retriever | format_docs, 'question': RunnablePassthrough()}
+rag_chain_from_docs = (
+    RunnablePassthrough.assign(context=(lambda x: format_docs(x["context"])))
     | prompt
     | model
     | StrOutputParser()
 )
 
-print("rag_chain:",rag_chain)
-
 # Chain 실행
-result = rag_chain.invoke(question)
-print(result)
+# result = rag_chain.invoke(question)
+# print(result)
+
+rag_chain_with_source = RunnableParallel(
+    {'context': retriever, 'question': RunnablePassthrough()}
+).assign(answer=rag_chain_from_docs)
+
+output = {}
+curr_key = None
+for chunk in rag_chain_with_source.stream(question):
+    for key in chunk:
+        if key in 'answer':
+            if key not in output:
+                output[key] = chunk[key]
+            else:
+                output[key] += chunk[key]
+            if key != curr_key:
+                print(f"\n\n{key}: {chunk[key]}", end="", flush=True)
+            else:
+                print(chunk[key], end="", flush=True)
+            curr_key = key
+output
