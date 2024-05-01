@@ -35,7 +35,7 @@ openai_key = st.text_input('Please enter your OPEN_AI_API_KEY', type="password")
 uploaded_file = st.file_uploader("Please upload a PDF file", type=['pdf'])
 st.write("---")
 
-def pdf_to_document(uploaded_files):
+def pdf_to_document(uploaded_file):
     temp_dir = tempfile.TemporaryDirectory()
     temp_filepath = os.path.join(temp_dir.name, uploaded_file.name)
     with open(temp_filepath, "wb") as f:
