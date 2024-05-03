@@ -29,7 +29,8 @@ st.title("ChatPDF")
 st.write("---")
 
 # OpenAI KEY 입력 받기
-openai_key = st.text_input('Please enter your OPEN_AI_API_KEY', type="password")
+# openai_key = st.text_input('Please enter your OPEN_AI_API_KEY', type="password")
+openai_key = os.getenv('OPENAI_API_KEY')
 
 # 파일 업로드
 uploaded_file = st.file_uploader("Please upload a PDF file", type=['pdf'])
@@ -80,7 +81,7 @@ if uploaded_file is not None:
             # LLM
             model = ChatOpenAI(model='gpt-3.5-turbo', temperature=0, max_tokens=40, openai_api_key=openai_key)
 
-            # Rretriever(검색)
+            # Retriever(검색)
             # 사용자의 질문이나 주어진 컨텍스트에 가장 관련된 정보를 찾아내는 과정입니다. 
             # 사용자의 입력을 바탕으로 쿼리를 생성하고, 인덱싱된 데이터에서 가장 관련성 높은 정보를 검색합니다. 
             # LangChain의 retriever 메소드를 사용합니다.
