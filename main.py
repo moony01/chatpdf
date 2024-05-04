@@ -1,4 +1,5 @@
 # 배포 시 sqlite 에러 해결
+# 로컬로 테스트 시 주석 처리 해야함
 __import__('pysqlite3')
 import sys
 sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')
