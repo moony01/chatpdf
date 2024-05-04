@@ -1,5 +1,5 @@
 ## 프로젝트 제목
-PDF 파일 업로드 AI 채팅: [ai-poet-moony.streamlit.app](https://ai-poet-moony.streamlit.app/)
+PDF 파일 업로드 AI 채팅: [ai-poet-moony.streamlit.app](https://chatpdf-moony.streamlit.app/)
 
 ## 프로젝트 설명
 Langchain framework를 활용한 PDF 파일을 업로드 하여 AI에게 학습 시킨 뒤 PDF파일의 데이터를 기반으로 대화를 하는 앱
@@ -11,6 +11,7 @@ Langchain framework를 활용한 PDF 파일을 업로드 하여 AI에게 학습 
 * Streamlit
 * Streamlit Extras
 * Python
+* RAGs
 
 ## 설치 방법
 1. 앱은 Python기반입니다. 앱을 실행하기 위해 [Python v3.9을 설치](https://www.python.org/downloads/) 합니다. (`v3.9`를 기반으로 개발하였습니다.)
